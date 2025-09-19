@@ -44,8 +44,21 @@ function renderUsers(users){
         tableRow.id = "data-user-id-" + id++; 
         for (const key of keys) {
             const tableData = document.createElement("td");
-            tableData.textContent = user[key];
-            tableRow.appendChild(tableData);
+
+            if(typeof user[key] === "object" && user[key] !== null){
+            let nested = [];
+
+            for (const nestedKey of Object.keys(user[key])) {
+                const value = user[key][nestedKey]
+                if (typeof value !== "object" || value === null) {
+          nested.push(`${nestedKey}: ${value}`);
+        }
+            }
+            tableData.textContent = nested.join(", ")
+            } else{
+                  tableData.textContent = user[key];                   
+            }
+            tableRow.appendChild(tableData); 
         }
         table.appendChild(tableRow);
     }
@@ -53,4 +66,8 @@ function renderUsers(users){
 
 function renderTableHead(users){
 
+}
+
+function checkIfNestedObject(key, user){
+    
 }
