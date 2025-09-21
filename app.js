@@ -27,7 +27,7 @@ async function fetchData(){
 }
 
 function renderUsers(users){
-    const table = document.querySelector("#usersTable");
+    const table = document.querySelector("#userTable");
     const headerRow = document.createElement("tr");
     const keys = Object.keys(users[0]);
     for (const key of keys) {
@@ -51,7 +51,7 @@ function renderUsers(users){
             for (const nestedKey of Object.keys(user[key])) {
                 const value = user[key][nestedKey]
                 if (typeof value !== "object" || value === null) {
-          nested.push(`${nestedKey}: ${value}`);
+          nested.push(`${value}`);
         }
             }
             tableData.textContent = nested.join(", ")
