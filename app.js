@@ -45,7 +45,7 @@ function renderTableHead(table, users, keys) {
 }
 
 function renderTableRows(table, users, keys) {
-  var id = 1;
+  let id = 1;
 
   for (const user of users) {
     const tableRow = document.createElement("tr");
@@ -63,7 +63,10 @@ function renderTableRows(table, users, keys) {
       }
       tableRow.appendChild(tableData);
     }
+    tableRow.appendChild(createButtons(table));
+
     table.appendChild(tableRow);
+    
   }
 }
 
@@ -77,4 +80,18 @@ function handleNestedJsonObjects(user, key){
           }
         }
         return nested.join(", ");
+}
+
+function createButtons(table){
+  const buttonTableData = document.createElement("td");
+    for(let i = 0; i < 2; i++){
+        let buttonName = "Edit";
+        if(i == 0){
+          buttonName = "Delete"
+        }
+        const button = document.createElement("button");
+        button.textContent = buttonName;
+        buttonTableData.appendChild(button);
+      }
+  return buttonTableData;
 }
