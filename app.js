@@ -63,6 +63,7 @@ function renderTableRows(table, users, keys) {
       }
       tableRow.appendChild(tableData);
     }
+
     tableRow.appendChild(createButtons(table));
 
     table.appendChild(tableRow);
@@ -91,6 +92,7 @@ function createButtons(table){
         }
         const button = document.createElement("button");
         button.textContent = buttonName;
+        button.id = buttonName + "ButtonId";
         buttonTableData.appendChild(button);
       }
   return buttonTableData;
