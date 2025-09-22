@@ -71,17 +71,20 @@ function renderTableRows(table, users, keys) {
   }
 }
 
-function handleNestedJsonObjects(user, key){
-    let nested = [];
-
-        for (const nestedKey of Object.keys(user[key])) {
-          const value = user[key][nestedKey];
-          if (typeof value !== "object" || value === null) {
-            nested.push(`${value}`);
-          }
-        }
-        return nested.join(", ");
-}
+function handleNestedJsonObjects(obj, key){ 
+  let nested = []; 
+  function iterate(value){ 
+    if (typeof value === "object" && value !== null){ 
+      for (const nestedKey of Object.keys(value)){
+         iterate(value[nestedKey]); 
+        } 
+      } else { 
+        nested.push(String(value)); 
+      } 
+    } 
+    iterate(obj[key]); 
+    return nested.join(", "); 
+  }
 
 function createButtons(table){
   const buttonTableData = document.createElement("td");
