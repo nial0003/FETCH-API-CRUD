@@ -51,11 +51,9 @@ function renderTableHead(table, users, keys) {
 }
 
 function renderTableRows(table, users, keys) {
-  let id = 1;
-
-  for (const user of users) {
+   for (const user of users) {
     const tableRow = document.createElement("tr");
-    tableRow.id = "data-user-id-" + id++;
+    tableRow.dataset.userId = user.id;
 
     for (const key of keys) {
       const tableData = document.createElement("td");
@@ -94,16 +92,12 @@ function handleNestedJsonObjects(obj, key){
 
 function createButtons(table){
   const buttonTableData = document.createElement("td");
-    for(let i = 0; i < 2; i++){
-        let buttonName = "Edit";
-        if(i == 0){
-          buttonName = "Delete"
-        }
-        const button = document.createElement("button");
-        button.textContent = buttonName;
-        button.id = buttonName + "Button";
-        buttonTableData.appendChild(button);
-      }
+  ["Delete", "Edit"].forEach(label => {
+    const button = document.createElement("button");
+    button.textContent = label;
+    button.id = label + "Button";
+    buttonTableData.appendChild(button);
+  })
   return buttonTableData;
 }
 
@@ -113,13 +107,15 @@ function handleClick(event){
   if (target.tagName !== "BUTTON") return;
 
   const row = target.closest("tr");
+  const userId = row?.dataset.userId;
 
   if(target.id === "DeleteButton"){
     console.log("Delete clicked");
   }
 
   if(target.id === "EditButton"){
-    console.log("Edit clicked");
+    const userObject = users.find(user => String(user.id) === String(userId));
+    if (userObject) handleEditClick(userObject);
   }
 }
 
@@ -127,20 +123,30 @@ async function handleCreateUser(event){
   event.preventDefault();
   const form = event.target;
 
-  const formData = new FormData(event.target);
+  const formData = new FormData(form);
   const jsonObject = Object.fromEntries(formData.entries());
 
+  const editingId = form.dataset.editingId;
+
   try{
+    if(editingId){
+      const updatedObject = await saveEditedUser(editingId, jsonObject);
+      const idx = users.findIndex(user => String(user.id) === String(editingId));
+      if(idx !== -1) users[idx] = { ...users[idx], ...updatedObject};
+      rerenderUsersTable(users);
+
+      delete form.dataset.editingId;
+      form.reset();
+      return;
+    }
+
     const result = await fetch(USERS_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json"},
       body: JSON.stringify(jsonObject),
     });
 
-    if(!result.ok){
-      throw new Error(`Post failed: ${result.status}`);
-    }
-
+    if(!result.ok) throw new Error(`Post failed: ${result.status}`);
     const createdJsonObject = await result.json();
 
     users.push(createdJsonObject)
@@ -150,10 +156,29 @@ async function handleCreateUser(event){
   } catch (err){
     console.error(err);
   }
+}
 
-  function rerenderUsersTable(users){
+function rerenderUsersTable(users){
     const table = document.querySelector("#userTable");
     table.textContent ="";
     renderUsers(users);
   }
+
+  function handleEditClick(userObject){
+    const form = document.querySelector("#userForm")
+    
+    form.querySelector("#name").value = userObject.name ?? "";
+    form.querySelector("#email").value = userObject.email ?? "";
+
+    form.dataset.editingId = userObject.id;
+  }
+
+async function saveEditedUser(id, jsonObject){
+  const result = await fetch(`${USERS_URL}/${id}`, {
+    method: "PATCH",
+    headers: {"Content-Type": "application/json" },
+    body: JSON.stringify(jsonObject),
+  });
+  if(!result.ok) throw new Error(`Update failed: ${result.status}`);
+  return result.json();
 }
