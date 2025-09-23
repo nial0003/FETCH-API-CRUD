@@ -9,7 +9,9 @@ async function initApp() {
   renderUsers(data);
 
   document.querySelector("#userTable").addEventListener("click", handleClick);
-  document.querySelector("#userForm").addEventListener("submit", handleFormSubmit)
+
+  const jsonObect = await waitForForm("#userForm");
+  console.log(jsonObect);
 }
 
 async function fetchData() {
@@ -122,11 +124,17 @@ function handleClick(event){
   }
 }
 
-function handleFormSubmit(event){
-  event.preventDefault();
-    
-  const formData = new FormData(event.target);
-  const jsonObject = Object.fromEntries(formData.entries());
+function waitForForm(selector){
+  return new Promise((resolve) => {
+    const form = document.querySelector(selector);
 
-  console.log(jsonObject);
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(event.target);
+      const jsonObject = Object.fromEntries(formData.entries());
+
+      resolve(jsonObject);
+    }, { once: true});
+  });
 }
