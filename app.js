@@ -1,17 +1,16 @@
 const USERS_URL = "https://jsonplaceholder.typicode.com/users";
 
-
+let users = []
 
 initApp();
 
 async function initApp() {
-  const data = await fetchData();
-  renderUsers(data);
+  users = await fetchData();
+  renderUsers(users);
 
   document.querySelector("#userTable").addEventListener("click", handleClick);
 
-  const jsonObect = await waitForForm("#userForm");
-  console.log(jsonObect);
+  document.querySelector("#userForm").addEventListener("submit", handleCreateUser);
 }
 
 async function fetchData() {
@@ -124,17 +123,37 @@ function handleClick(event){
   }
 }
 
-function waitForForm(selector){
-  return new Promise((resolve) => {
-    const form = document.querySelector(selector);
+async function handleCreateUser(event){
+  event.preventDefault();
+  const form = event.target;
 
-    form.addEventListener("submit", (event) => {
-      event.preventDefault();
+  const formData = new FormData(event.target);
+  const jsonObject = Object.fromEntries(formData.entries());
 
-      const formData = new FormData(event.target);
-      const jsonObject = Object.fromEntries(formData.entries());
+  try{
+    const result = await fetch(USERS_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json"},
+      body: JSON.stringify(jsonObject),
+    });
 
-      resolve(jsonObject);
-    }, { once: true});
-  });
+    if(!result.ok){
+      throw new Error(`Post failed: ${result.status}`);
+    }
+
+    const createdJsonObject = await result.json();
+
+    users.push(createdJsonObject)
+    rerenderUsersTable(users);
+
+    form.reset();
+  } catch (err){
+    console.error(err);
+  }
+
+  function rerenderUsersTable(users){
+    const table = document.querySelector("#userTable");
+    table.textContent ="";
+    renderUsers(users);
+  }
 }
