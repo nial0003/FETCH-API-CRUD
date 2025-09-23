@@ -8,8 +8,8 @@ async function initApp() {
   const data = await fetchData();
   renderUsers(data);
 
-  const table = document.querySelector("#userTable").addEventListener("click", handleClick);
-
+  document.querySelector("#userTable").addEventListener("click", handleClick);
+  document.querySelector("#userForm").addEventListener("submit", handleFormSubmit)
 }
 
 async function fetchData() {
@@ -120,4 +120,13 @@ function handleClick(event){
   if(target.id === "EditButton"){
     console.log("Edit clicked");
   }
+}
+
+function handleFormSubmit(event){
+  event.preventDefault();
+    
+  const formData = new FormData(event.target);
+  const jsonObject = Object.fromEntries(formData.entries());
+
+  console.log(jsonObject);
 }
