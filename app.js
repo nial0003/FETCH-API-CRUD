@@ -1,11 +1,16 @@
 const USERS_URL = "https://jsonplaceholder.typicode.com/users";
 
 let users = []
+let nextLocalId = 1;
 
 initApp();
 
 async function initApp() {
   users = await fetchData();
+
+  const maxId = Math.max(...users.map(u => Number(u.id) || 0))
+  nextLocalId = isFinite(maxId) ? maxId + 1 : 1;
+
   renderUsers(users);
 
   document.querySelector("#userTable").addEventListener("click", handleClick);
@@ -148,6 +153,8 @@ async function handleCreateUser(event){
 
     if(!result.ok) throw new Error(`Post failed: ${result.status}`);
     const createdJsonObject = await result.json();
+
+    createdJsonObject.id = nextLocalId++;
 
     users.push(createdJsonObject)
     rerenderUsersTable(users);
