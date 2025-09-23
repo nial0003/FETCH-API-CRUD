@@ -1,10 +1,15 @@
 const USERS_URL = "https://jsonplaceholder.typicode.com/users";
 
+
+
 initApp();
 
 async function initApp() {
   const data = await fetchData();
   renderUsers(data);
+
+  const table = document.querySelector("#userTable").addEventListener("click", handleClick);
+
 }
 
 async function fetchData() {
@@ -95,8 +100,24 @@ function createButtons(table){
         }
         const button = document.createElement("button");
         button.textContent = buttonName;
-        button.id = buttonName + "ButtonId";
+        button.id = buttonName + "Button";
         buttonTableData.appendChild(button);
       }
   return buttonTableData;
+}
+
+function handleClick(event){
+  const target = event.target;
+
+  if (target.tagName !== "BUTTON") return;
+
+  const row = target.closest("tr");
+
+  if(target.id === "DeleteButton"){
+    console.log("Delete clicked");
+  }
+
+  if(target.id === "EditButton"){
+    console.log("Edit clicked");
+  }
 }
