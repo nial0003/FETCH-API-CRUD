@@ -115,7 +115,7 @@ function handleClick(event){
   const userId = row?.dataset.userId;
 
   if(target.id === "DeleteButton"){
-    console.log("Delete clicked");
+    onDeleteUser(userId, target);
   }
 
   if(target.id === "EditButton"){
@@ -188,4 +188,29 @@ async function saveEditedUser(id, jsonObject){
   });
   if(!result.ok) throw new Error(`Update failed: ${result.status}`);
   return result.json();
+}
+
+async function onDeleteUser(userId, buttonElement){
+  if(!userId) return;
+
+  if(buttonElement) buttonElement.disabled = true;
+
+  try{
+    await deleteUserFromApi(userId);
+    users = users.filter(user => String(user.id) !== String(userId));
+    nextLocalId = users.length + 1;
+    rerenderUsersTable(users)
+  } catch (error){
+    console.error(error)
+  } finally {
+    if(buttonElement) buttonElement.disabled = false;
+  }
+}
+
+async function deleteUserFromApi(userId) {
+  const result = await fetch(`${USERS_URL}/${userId}`, {
+    method: "DELETE"
+  });
+  if (!result.ok) throw new (`Delete failed: ${(await result).status}`);
+  return true;
 }
